@@ -1,0 +1,27 @@
+# systemd unit. Install (see README):
+#   sudo install -Dm755 dexcom-ns-uploader.sh /opt/dexcom-g7-ns-uploader/dexcom-ns-uploader.sh
+#   sudo install -Dm600 .env /etc/dexcom-ns-uploader.env
+#   sudo cp dexcom-ns-uploader.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now dexcom-ns-uploader
+#   journalctl -u dexcom-ns-uploader -f
+[Unit]
+Description=Dexcom G7 (Dexcom Share) to Nightscout uploader
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# systemd reads the secrets file as root, so it can stay chmod 600.
+EnvironmentFile=/etc/dexcom-ns-uploader.env
+Environment=ENV_FILE=/nonexistent
+ExecStart=/opt/dexcom-g7-ns-uploader/dexcom-ns-uploader.sh
+Restart=always
+RestartSec=60
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

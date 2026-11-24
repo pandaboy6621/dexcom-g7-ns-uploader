@@ -1,0 +1,11 @@
+services:
+  dexcom-ns-uploader:
+    build: .
+    container_name: dexcom-ns-uploader
+    restart: unless-stopped
+    env_file: .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
