@@ -245,7 +245,7 @@ ns_upload() {
   ns_http POST "/api/v1/entries" "$1" || { error "Nightscout upload: network error: $HTTP_BODY"; return 1; }
   case "$HTTP_CODE" in
     200|201) return 0 ;;
-    401|403) error "Nightscout rejected the upload (HTTP $HTTP_CODE). The token/secret needs write (readable+create) access"; return 1 ;;
+    401|403) error "Nightscout rejected the upload (HTTP $HTTP_CODE). The token needs a role with api:entries:create (or use the API secret)"; return 1 ;;
     *) error "Nightscout upload failed (HTTP $HTTP_CODE): $HTTP_BODY"; return 1 ;;
   esac
 }

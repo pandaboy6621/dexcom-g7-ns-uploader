@@ -65,12 +65,24 @@ Use `--once`. It does one sync and exits with status 0 on success and 1 on failu
 | `DEXCOM_REGION` | `us` | `us`, `ous`, `jp` |
 | `NIGHTSCOUT_URL` | — | e.g. `https://my-ns.example.com` |
 | `NIGHTSCOUT_API_SECRET` | — | Plain or SHA-1 hashed. Sent as the `api-secret` header |
-| `NIGHTSCOUT_TOKEN` | — | Use this instead of the API secret: an access token with `readable` + `create` roles |
+| `NIGHTSCOUT_TOKEN` | — | Use this instead of the API secret: an access token whose subject has `readable` plus a role with `api:entries:create` (see below) |
 | `POLL_INTERVAL` | `120` | Seconds between checks in loop mode (min 60) |
 | `BACKFILL_MINUTES` | `1440` | How far back to fill gaps (Dexcom Share keeps 24 h max) |
 | `DEVICE_NAME` | `dexcom-g7-ns-uploader` | Shown as the device on each entry |
 | `LOG_LEVEL` | `info` | `debug` for more detail |
 | `ENV_FILE` | `./.env` next to the script | Path to the env file to load |
+
+## Nightscout access token
+
+You can use your `API_SECRET`, or create a separate access token so you can revoke it later.
+Nightscout has no built-in role that can upload entries except `admin`, so add one:
+
+1. In Nightscout, open **Admin Tools** → **Add new Role**. Name: `entries-upload`. Permissions: `api:entries:create`.
+2. **Add new Subject**. Name: `dexcom-uploader`. Roles: `readable, entries-upload`.
+3. Copy the subject's access token into `NIGHTSCOUT_TOKEN`.
+
+`readable` lets the uploader find the newest entry, and `entries-upload` lets it add new ones.
+Giving the subject `admin` also works, but admin can change or delete anything in Nightscout.
 
 ## How it works
 
@@ -90,4 +102,4 @@ Run `--check`, then start the service. Once you see `Uploaded N reading(s)` in t
 
 - **`AccountPasswordInvalid` / invalid id:** wrong username, password or region. Phone numbers need the `+` and country code.
 - **Logged in but 0 readings:** Share is off in the G7 app, or the phone running the G7 app is offline.
-- **Nightscout HTTP 401:** wrong API secret, or the token doesn't have the `create` role.
+- **Nightscout HTTP 401:** wrong API secret, or the token's subject is missing a role with `api:entries:create`.
