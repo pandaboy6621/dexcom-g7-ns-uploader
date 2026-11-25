@@ -15,18 +15,39 @@ G7 sensor ──► Dexcom G7 app (with Share on) ──► Dexcom Share cloud �
 3. **Username format:** use an email, a phone number in international format (`+15551234567`), or the Dexcom account ID (a UUID). If phone login fails, try the account ID. pydexcom's docs show how to find it.
 4. Pick your region: `us`, `ous` (outside the US) or `jp`.
 
-## Quick start
+## Quick start (setup script)
 
 ```bash
 git clone https://github.com/pandaboy6621/dexcom-g7-ns-uploader.git
 cd dexcom-g7-ns-uploader
-cp .env.example .env    # then edit .env
+./install.sh
+```
+
+The script walks you through four steps:
+
+1. **Checks for `curl` and `jq`**, and offers to install them if they're missing.
+2. **Asks for your settings:** Dexcom username, password and region, then your Nightscout URL and API_SECRET or access token. Passwords are typed hidden, and everything is saved to `.env`, which only your user can read.
+3. **Tests both logins** without uploading anything. If a login fails, it tells you which one and lets you re-enter.
+4. **Starts it in the background.** It uses a systemd service on Linux (starts on boot), a launchd agent on macOS (runs while you're logged in and the Mac is awake), or Docker.
+
+To change settings later, run `./install.sh` again. To stop and remove the background service:
+
+```bash
+./install.sh --uninstall
+```
+
+## Manual start
+
+If you'd rather set it up yourself:
+
+```bash
+cp .env.example .env              # then edit .env
 ./dexcom-ns-uploader.sh --check   # test both logins, uploads nothing
 ./dexcom-ns-uploader.sh --once    # one sync
 ./dexcom-ns-uploader.sh           # run forever (polls every POLL_INTERVAL seconds)
 ```
 
-## Run it in the background
+## Run it in the background (manually)
 
 ### Docker (easiest on a homelab box)
 
